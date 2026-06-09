@@ -1,73 +1,76 @@
 #include <stdio.h>
 
-#define TAMANHO_TABULEIRO 10
-#define TAMANHO_NAVIO 3
-#define AGUA 0
-#define NAVIO 3
-
 int main() {
-    // 1. Representação do Tabuleiro
-    // Matriz 10x10 inicializada com 0 (representando água)
-    int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO] = {0};
+    // 1. Definição do Tabuleiro 10x10
+    int tabuleiro[10][10] = {0}; 
+    // Exemplo de navio posicionado na linha 4, colunas 2, 3 e 4
+    tabuleiro[4][2] = 3; tabuleiro[4][3] = 3; tabuleiro[4][4] = 3;
 
-    // 2. Definição dos Navios
-    // Navio Horizontal (inicia na linha 2, coluna 2 e ocupa 3 posições para a direita)
-    int linhaNavioH = 2;
-    int colunaNavioH = 2;
-    int orientacaoH = 0; // 0 para Horizontal, 1 para Vertical
+    // 2. Definição das Matrizes de Habilidade (5x5)
+    int cone[5][5] = {
+        {0, 0, 1, 0, 0},
+        {0, 1, 1, 1, 0},
+        {1, 1, 1, 1, 1},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0}
+    };
 
-    // Navio Vertical (inicia na linha 5, coluna 7 e ocupa 3 posições para baixo)
-    int linhaNavioV = 5;
-    int colunaNavioV = 7;
-    int orientacaoV = 1;
+    int cruz[5][5] = {
+        {0, 0, 1, 0, 0},
+        {0, 0, 1, 0, 0},
+        {1, 1, 1, 1, 1},
+        {0, 0, 1, 0, 0},
+        {0, 0, 1, 0, 0}
+    };
 
-    // 3. Validação e Posicionamento dos Navios
+    int octaedro[5][5] = {
+        {0, 0, 1, 0, 0},
+        {0, 1, 1, 1, 0},
+        {1, 1, 1, 1, 1},
+        {0, 1, 1, 1, 0},
+        {0, 0, 1, 0, 0}
+    };
 
-    // Posicionamento do Navio Horizontal
-    if (orientacaoH == 0) {
-        // Valida se o navio não ultrapassa os limites do tabuleiro
-        if (colunaNavioH + TAMANHO_NAVIO <= TAMANHO_TABULEIRO) {
-            for (int i = 0; i < TAMANHO_NAVIO; i++) {
-                tabuleiro[linhaNavioH][colunaNavioH + i] = NAVIO;
-            }
-        } else {
-            printf("Erro: Navio horizontal ultrapassa os limites do tabuleiro!\n");
-        }
-    }
-
-    // Posicionamento do Navio Vertical
-    if (orientacaoV == 1) {
-        // Valida se o navio não ultrapassa os limites do tabuleiro
-        if (linhaNavioV + TAMANHO_NAVIO <= TAMANHO_TABULEIRO) {
-            for (int i = 0; i < TAMANHO_NAVIO; i++) {
-                tabuleiro[linhaNavioV + i][colunaNavioV] = NAVIO;
-            }
-        } else {
-            printf("Erro: Navio vertical ultrapassa os limites do tabuleiro!\n");
-        }
-    }
-
-    // 4. Exibição do Tabuleiro
-    printf("Tabuleiro de Batalha Naval:\n\n");
+    // 3. Ponto de Origem da Habilidade no Tabuleiro 10x10
+    int origemLinha = 4;
+    int origemColuna = 3;
     
-    // Imprime os cabeçalhos das colunas (0 a 9)
-    printf("  ");
-    for (int c = 0; c < TAMANHO_TABULEIRO; c++) {
-        printf("%d ", c);
-    }
-    printf("\n");
+    // Escolha qual habilidade aplicar (ex: cone)
+    int (*habilidade)[5] = cone; 
 
-    // Loop aninhado para exibir as linhas e colunas da matriz
-    for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
-        // Imprime o cabeçalho da linha
-        printf("%d ", i); 
-        
-        for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
-            printf("%d ", tabuleiro[i][j]);
+    // 4. Lógica de Sobreposição
+    int tamanhoHabilidade = 5;
+    int deslocamento = tamanhoHabilidade / 2; // = 2
+
+    for (int i = 0; i < tamanhoHabilidade; i++) {
+        for (int j = 0; j < tamanhoHabilidade; j++) {
+            if (habilidade[i][j] == 1) {
+                // Calcula a linha e coluna real no tabuleiro
+                int linhaTab = origemLinha - deslocamento + i;
+                int colunaTab = origemColuna - deslocamento + j;
+
+                // Verifica se a coordenada está dentro dos limites do tabuleiro 10x10
+                if (linhaTab >= 0 && linhaTab < 10 && colunaTab >= 0 && colunaTab < 10) {
+                    // Se a posição do tabuleiro possui um navio (valor 3), marca como atingido. 
+                    // Se for água (valor 0), podemos marcar como atingido (ex: valor 8 ou -1)
+                    if (tabuleiro[linhaTab][colunaTab] == 3) {
+                        tabuleiro[linhaTab][colunaTab] = -1; // -1 indica dano
+                    } else {
+                        tabuleiro[linhaTab][colunaTab] = 8;  // 8 indica tiro na água
+                    }
+                }
+            }
+        }
+    }
+
+    // 5. Exibição do Tabuleiro atualizado
+    printf("Tabuleiro Atualizado:\n");
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            printf("%2d ", tabuleiro[i][j]);
         }
         printf("\n");
     }
 
     return 0;
 }
-
